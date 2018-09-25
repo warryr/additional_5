@@ -1,22 +1,39 @@
 module.exports = function check(str, bracketsConfig) {
-  var temp = [];
-  
-  for (var i = 0; i < str.length; i++){
-    if (str[i] == '(' || str[i] == '[' || str[i] == '{'){
-      temp.push(str[i]);
-    } else if (str[i] == ')' || str[i] == ']' || str[i] == '}'){
-      if (temp.length == 0){
-            return false;
-          } else{
-            open = temp.pop();
-            if (!(open == '(' && str[i] == ')') && !(open == '[' && str[i] == ']') && !(open == '{' & str[i] == '}')){
-                return false;
-            }
+  const stack = [];
+
+  for (let i = 0, len = str.length; i < len; i++){
+    let pair = tryGetCloserPair(str[i]);
+
+    if (pair != null){
+      if (stack.length == 0){
+        if (pair == str[i]){
+          stack.push(str[i]);
+        } else{
+          return false;
         }
+      }
+      else{
+        const temp = stack.pop();
+        if (temp != pair){
+          if (pair == str[i]){
+            stack.push(temp, str[i]);
+          } else{
+            return false;
+          }
+        }
+      }
+    } else{
+      stack.push(str[i]);
     }
   }
-  if (temp.length > 0){
-    return false;
+  return stack.length == 0;
+
+  function tryGetCloserPair(bracket){
+    for (let i = 0, len = bracketsConfig.length; i < len; i++){
+      if (bracket == bracketsConfig[i][1]){
+        return bracketsConfig[i][0];
+      }
+    }
+    return null;
   }
-  return true;
 }
